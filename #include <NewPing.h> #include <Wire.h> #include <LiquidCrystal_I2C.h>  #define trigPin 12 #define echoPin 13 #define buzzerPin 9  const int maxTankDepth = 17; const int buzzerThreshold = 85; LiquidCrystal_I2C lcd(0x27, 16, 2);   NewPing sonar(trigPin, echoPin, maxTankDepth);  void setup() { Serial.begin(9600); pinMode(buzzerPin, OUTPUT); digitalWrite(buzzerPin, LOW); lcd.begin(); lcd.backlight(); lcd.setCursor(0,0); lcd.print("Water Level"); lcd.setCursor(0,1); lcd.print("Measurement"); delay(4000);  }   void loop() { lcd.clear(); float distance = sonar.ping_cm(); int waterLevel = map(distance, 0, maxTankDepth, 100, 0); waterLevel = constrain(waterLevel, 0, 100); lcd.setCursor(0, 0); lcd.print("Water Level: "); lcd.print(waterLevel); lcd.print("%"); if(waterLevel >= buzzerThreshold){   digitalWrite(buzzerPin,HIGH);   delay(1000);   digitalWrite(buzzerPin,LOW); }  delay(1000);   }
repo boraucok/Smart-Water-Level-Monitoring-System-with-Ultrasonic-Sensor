@@ -1,0 +1,48 @@
+#include <NewPing.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+#define trigPin 12
+#define echoPin 13
+#define buzzerPin 9
+
+const int maxTankDepth = 17;
+const int buzzerThreshold = 85;
+LiquidCrystal_I2C lcd(0x27, 16, 2); 
+
+NewPing sonar(trigPin, echoPin, maxTankDepth);
+
+void setup() {
+Serial.begin(9600);
+pinMode(buzzerPin, OUTPUT);
+digitalWrite(buzzerPin, LOW);
+lcd.begin();
+lcd.backlight();
+lcd.setCursor(0,0);
+lcd.print("Water Level");
+lcd.setCursor(0,1);
+lcd.print("Measurement");
+delay(4000);
+
+}
+
+
+void loop() {
+lcd.clear();
+float distance = sonar.ping_cm();
+int waterLevel = map(distance, 0, maxTankDepth, 100, 0);
+waterLevel = constrain(waterLevel, 0, 100);
+lcd.setCursor(0, 0);
+lcd.print("Water Level: ");
+lcd.print(waterLevel);
+lcd.print("%");
+if(waterLevel >= buzzerThreshold){
+  digitalWrite(buzzerPin,HIGH);
+  delay(1000);
+  digitalWrite(buzzerPin,LOW);
+}
+
+delay(1000);
+
+
+}
